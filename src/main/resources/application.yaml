@@ -1,0 +1,12 @@
+mybatis-plus:
+  global-config:
+    db-column-underline: true
+
+
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
