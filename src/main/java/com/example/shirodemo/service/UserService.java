@@ -12,7 +12,7 @@ import com.example.shirodemo.entity.User;
  * @since 2022-02-15 21:06:15
  */
 public interface UserService extends IService<User> {
-    User queryTest(String id);
+//    User queryTest(String id);
 //    /**
 //     * 通过ID查询单条数据
 //     *
@@ -53,5 +53,5 @@ public interface UserService extends IService<User> {
 //     * @return 是否成功
 //     */
 //    boolean deleteById(String id);
-
+        Integer  test();
 }

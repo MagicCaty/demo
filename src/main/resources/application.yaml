@@ -1,8 +1,7 @@
 mybatis-plus:
   global-config:
     db-column-underline: true
-
-
+#   对应service下日子
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 

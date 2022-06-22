@@ -2,8 +2,9 @@ package com.example.shirodemo.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.shirodemo.entity.User;
 import com.example.shirodemo.dao.UserDao;
+import com.example.shirodemo.diyinterface.MyInterface;
+import com.example.shirodemo.entity.User;
 import com.example.shirodemo.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,19 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserDao,User> implements UserService {
+
     @Override
-    public User queryTest(String id) {
-        //
-        UserDao baseMapper = this.baseMapper;
-        return this.baseMapper.queryTestO(id);
+    @MyInterface
+    public Integer test() {
+        System.out.println("目标方法被调用");
+        return 42;
     }
+//    @Override
+//    public User queryTest(String id) {
+//        //
+//        UserDao baseMapper = this.baseMapper;
+//        return this.baseMapper.queryTestO(id);
+//    }
 
 
 //    @Resource
