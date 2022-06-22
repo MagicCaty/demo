@@ -12,7 +12,7 @@ public  class Test {
     public static void main(String[] args) {
         TeacherDaoImpl teacherDao = new TeacherDaoImpl();
         CglibProxyFactory cglibProxyFactory = new CglibProxyFactory(teacherDao);
-        TeacherDao proxyInstance = (TeacherDao) cglibProxyFactory.getProxyInstance();
+        TeacherDaoImpl proxyInstance = (TeacherDaoImpl) cglibProxyFactory.getProxyInstance();
         proxyInstance.teach();
     }
 }

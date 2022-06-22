@@ -2,6 +2,7 @@ package com.example.myspring.service;
 
 import com.example.myspring.spring.BeanPostProcessor;
 import com.example.myspring.spring.Component;
+import com.example.proxy.cglibproxy.CglibProxyFactory;
 
 /**
  * @Description:
@@ -21,11 +22,13 @@ public class MyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(String beanName, Object bean) {
-//        if (beanName.equals("orderService")) {
-//            System.out.println("orderServiceAfter");
-//        }
+        if (beanName.equals("orderService")) {
+            System.out.println("orderServiceAfter");
+        }
         //aop，将实例bean替换成代理对象
-
-        return bean;
+        CglibProxyFactory cglibProxyFactory = new CglibProxyFactory(bean);
+        Object proxyInstance = cglibProxyFactory.getProxyInstance();
+        System.out.println("代理对象" + proxyInstance);
+        return proxyInstance;
     }
 }

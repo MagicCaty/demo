@@ -123,7 +123,9 @@ public class MyApplicationContext {
      */
     @SneakyThrows
     private Object createBean(String beanName, BeanDefinition beanDefinition) {
+        //得到事先在定义类中bean对应的真正类型
         Class<?> type = beanDefinition.getType();
+        //得到无参构造方法
         Constructor<?> constructor = type.getConstructor();
         //实例化
         Object bean = constructor.newInstance();
@@ -146,7 +148,7 @@ public class MyApplicationContext {
             BeanName bean1 = (BeanName) bean;
             bean1.setBeanName(beanName);
         }
-        //初始化前
+        //初始化前,在扫描中已经创建了beanPostProcessor实例
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
             beanPostProcessor.postProcessBeforeInitialization(beanName,bean);
         }
@@ -157,10 +159,9 @@ public class MyApplicationContext {
         }
         //初始化后
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
-            beanPostProcessor.postProcessAfterInitialization(beanName,bean);
+            //使用cglib代理
+            bean = beanPostProcessor.postProcessAfterInitialization(beanName,bean);
         }
-
-
         return bean;
     }
 
