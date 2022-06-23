@@ -25,7 +25,7 @@ public class MyBeanPostProcessor implements BeanPostProcessor {
         if (beanName.equals("orderService")) {
             System.out.println("orderServiceAfter");
         }
-        //aop，将实例bean替换成代理对象
+        //aop，将实例bean替换成代理对象，并且将原bean作为属性注入代理对象中，解决代理对象无法自动注入的问题
         CglibProxyFactory cglibProxyFactory = new CglibProxyFactory(bean);
         Object proxyInstance = cglibProxyFactory.getProxyInstance();
         System.out.println("代理对象" + proxyInstance);

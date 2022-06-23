@@ -13,8 +13,22 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @Description: 模拟spring启动
- * @author:
+ * @Description: 模拟spring启动   扫描 -》 创建定义类 —》 通过定义类创建bean —》 单例池。。。
+ * 生命周期：
+ * 1.实例化普通对象 存入一级缓存，并在creatingSeting中存入beanName，表示正在创建bean
+ * 2.依赖注入      如果存在循环依赖，从二级缓存中找到需要注入的代理对象，如果找不到使用一级缓存中的lambda表达式创建代理对象注入，并存入二级缓存
+ * 3.填充普通对象的其他属性...
+ * 4.根据注解传入普通对象AOP， 如果二级缓存中有代理对象，则跳过这步，保证代理对象的单例
+ * 5.其他步骤，初始化前...后...
+ * 6.从二级缓存中取代理对象，这个代理对象就含有经过前面几步的完整生命周期的普通对象
+ * 7.添加入单例池
+ * 8.移除creatingSeting中定义
+ *
+ * 三级缓存作用：
+ * 1.singletonObjects      存放真正的单例bean,从二级缓存中取                                       《beanName，bean》
+ * 2.earlysingletonobjects 存放bean的代理对象，从一级缓存取，没有经过完整的生命周期，内部属性存在null     《beanName，ProxyBean》
+ * 3.singletonfactory      存放bean的普通对象                                                  《beanName，lambda<bean>》
+ *
  * @createTime: 2022/6/22 10:30
  **/
 @Slf4j
@@ -27,9 +41,11 @@ public class MyApplicationContext {
 
     private ArrayList<BeanPostProcessor> beanPostProcessorList = new ArrayList<>();
 
-    /*
+    /**
     构造方法，1.获取配置类上的注解，特别是扫描路径，进行指定包下的类扫描，创建每个类对应的定义类
+                解析扫描路径为绝对路径 —》 处理绝对路径下的.class文件 —》 根据注解处理Component则创建定义类
             2.创建单例bean的实例，加入单例池
+              根据beanDefinitionMap创建单例bean
      */
     @SneakyThrows
     public MyApplicationContext(Class<?> config) {
@@ -57,16 +73,16 @@ public class MyApplicationContext {
                     String fileAbsolutePath = listFile.getAbsolutePath(); //F:\work\javaIDEA\StudyProject\shirodemo\target\classes\com\example\myspring\service\AppConfig.class
                     //如果是class文件，判断是否有component注解
                     if (fileAbsolutePath.endsWith(".class")) {
-                        //截取处理文件路径，转为加载器可以识别的类名格式（截取com到.class）  com.example.myspring.service.AppConfig
+                        //截取处理文件路径，转为加载器可以识别的类名格式（截取com到.class，简化版） com.example.myspring.service.AppConfig
                         String className =
                                 fileAbsolutePath.substring(fileAbsolutePath.indexOf("com"), fileAbsolutePath.indexOf(".class"));
-                        className = className.replace("\\", "."); //com.example.myspring.service.AppConfig
+                        className = className.replace("\\", ".");
 
                         //通过类加载器，将文件下符合要求的子文件生成为Class类
                         Class<?> aClass = classLoader.loadClass(className);
                         //判断是否有Component注解
                         if (aClass.isAnnotationPresent(Component.class)) {
-                            //判断是否实现了BeanPostProcessor接口
+                            //判断是否实现了BeanPostProcessor接口，用于bean生命周期，调用初始化前、后方法
                             if (BeanPostProcessor.class.isAssignableFrom(aClass)) {
                                 BeanPostProcessor beanPostProcessor = (BeanPostProcessor) aClass.newInstance();
                                 beanPostProcessorList.add(beanPostProcessor);
@@ -118,7 +134,7 @@ public class MyApplicationContext {
 
     }
 
-    /*
+    /**
         创建bean,并进行依赖注入，调用初始化、前、后方法
      */
     @SneakyThrows
@@ -148,8 +164,9 @@ public class MyApplicationContext {
             BeanName bean1 = (BeanName) bean;
             bean1.setBeanName(beanName);
         }
-        //初始化前,在扫描中已经创建了beanPostProcessor实例
+        //初始化前,在扫描中已经创建了beanPostProcessor实例 还要处理@PostConstruct等等注解
         for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
+            //调用初始化前方法
             beanPostProcessor.postProcessBeforeInitialization(beanName,bean);
         }
         //初始化，调用初始化方法
@@ -165,9 +182,9 @@ public class MyApplicationContext {
         return bean;
     }
 
-    /*
+    /**
         得到一个bean，若为单例则从单例池获取，获取不到则调用createBean （内部字段的成员类还没有实例化）
-                    若为多例，每次都调用createBean返回
+     若为多例，每次都调用createBean返回
      */
     public Object getBean(String beanName) {
         Object object = null;

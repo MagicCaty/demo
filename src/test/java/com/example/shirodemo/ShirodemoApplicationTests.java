@@ -11,7 +11,6 @@ import com.example.shirodemo.entity.User;
 import com.example.shirodemo.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Resource;
@@ -28,10 +27,18 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@SpringBootTest
+//@SpringBootTest
 @Slf4j
 class ShirodemoApplicationTests {
 
+    @Test
+    public void test56() {
+        String a = "a";
+        String b = new String("a");
+        String intern = b.intern();
+        System.out.println(intern);
+        System.out.println(a.intern() == b.intern());
+    }
     @Test
     public void test55() {
         Parent parent = new Parent();
